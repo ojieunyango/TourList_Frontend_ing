@@ -13,6 +13,7 @@ const ThreadDetail = () => {
   const [thread, setThread] = useState<Thread | null>(null); // 게시글 데이터 상태
   const { user } = useContext(AuthContext); // 현재 로그인한 사용자
   const navigate = useNavigate(); // 페이지 이동을 위한 훅
+  const [liked, setLiked] = useState(false);
 
     // 수정추가: 수정 모드 여부 상태
     const [isEditing, setIsEditing] = useState(false);
@@ -40,7 +41,11 @@ const ThreadDetail = () => {
           pdfPath: data.pdfPath,
           area: data.area,
         });
+        // TODO: 여기서 좋아요 여부 API 호출해서 liked 상태 업데이트 가능
+        // 임시로 false로 세팅
+        setLiked(false);
       })
+      
      // 성공 시 상태에 저장
       .catch(err => {
         console.error('게시글 상세 조회 실패:', err);
@@ -81,8 +86,9 @@ const ThreadDetail = () => {
     }
 
     try {
-      const updatedThread = await likeThread(thread.threadId); // 좋아요 처리
+      const updatedThread = await likeThread(thread.threadId, user.userId); // 좋아요 처리
       setThread(updatedThread); // 좋아요 수 반영
+      setLiked(prev => !prev); // 토글 상태 반전
     } catch (error) {
       console.error('좋아요 처리 실패:', error);
       alert('좋아요 처리 중 오류가 발생했습니다.');
@@ -154,7 +160,10 @@ const ThreadDetail = () => {
 
       {/* 좋아요 수 및 버튼 */}
       <p>좋아요: {thread.heart}개</p>
-      <button onClick={handleLike}>❤️ 좋아요</button>
+      <button onClick={handleLike}
+       style={{ color: liked ? 'red' : 'gray', cursor: 'pointer' }}
+      >{liked ? '❤️ 좋아요 취소' : '🤍 좋아요'}
+      </button>
 
       {/* 수정/삭제 버튼은 작성자 본인만 볼 수 있음 */}
       {user && user.userId === thread.userId && (

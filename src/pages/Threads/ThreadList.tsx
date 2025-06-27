@@ -14,6 +14,11 @@ const ThreadList = () => {
   const [threads, setThreads] = useState<Thread[]>([]);
   //검색 키워드 입력 상태
   const [keyword, setKeyword] = useState('');
+  // 검색 기준 ('author' 또는 'title_content')
+  const [searchType, setSearchType] = useState<'author' | 'title_content'>('title_content'); 
+  // 정렬 기준
+  const [sortBy, setSortBy] = useState<'createDate' | 'views' | 'likes'>('createDate');
+
   // 현재 페이지 번호 상태 저장 (초기값: 1페이지)
   const [currentPage, setCurrentPage] = useState(1);
    // 한 페이지당 게시글 개수
@@ -43,7 +48,7 @@ const ThreadList = () => {
         return;
       }
       try {
-        const result = await searchThreads(keyword);
+        const result = await searchThreads(keyword, searchType, sortBy);
         setThreads(result);
         setCurrentPage(1); // 검색 결과는 첫 페이지부터 보기
       } catch (err) {
@@ -83,6 +88,23 @@ const ThreadList = () => {
     <div className={styles.container}>
       <h2>📝 게시글 목록</h2>
 
+       {/* 검색 기준 선택 UI 추가 */}
+       <div style={{ marginBottom: '16px' }}>
+       <select value={sortBy}
+       onChange={e => setSortBy(e.target.value as 'createDate' | 'views' | 'likes')}>
+       <option value="createDate">최신순</option>
+       <option value="views">조회수</option>
+       <option value="likes">좋아요수</option>
+     </select>
+        <select
+          value={searchType}
+          onChange={e => setSearchType(e.target.value as 'author' | 'title_content')} // 검색 기준 변경
+          style={{ padding: '6px 10px', marginRight: '8px' }}
+        >
+          <option value="title_content">제목 + 내용</option>
+          <option value="author">작성자</option>
+        </select>
+
        {/*  검색 입력창과 버튼 추가 */}
        <div style={{ marginBottom: '16px' }}>
         <input
@@ -95,13 +117,14 @@ const ThreadList = () => {
           <button onClick={handleSearch} style={{ marginLeft: '8px', padding: '6px 12px' }}>
           🔍 검색
         </button>
-      </div>
+        </div> 
+        
 
       {/* 게시글 작성 버튼: 로그인 사용자만 클릭 가능 */}
       <button onClick={handleCreateClick} className={styles.createBtn}>
         새 게시글 작성
       </button>
-
+      </div>
       {/* 게시글 리스트를 테이블 형태로 보여줌 */}
       <table className={styles.table}>
         <thead>
@@ -147,7 +170,9 @@ const ThreadList = () => {
         />
       </Stack>
     </div>
-  );
-};
+    );
+  };
+
+
 
 export default ThreadList;

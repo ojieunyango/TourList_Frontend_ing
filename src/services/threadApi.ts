@@ -31,12 +31,28 @@ export const updateThread = async (threadId: number, thread: ThreadRequest): Pro
 };
 
 /** 좋아요 기능 (게시글 좋아요 수 증가 등 처리) */
-export const likeThread = async (threadId: number): Promise<Thread> => {
-  const response = await api.post(`/thread/${threadId}/like`);
+// export const likeThread = async (threadId: number): Promise<Thread> => {
+//   const response = await api.post(`/thread/${threadId}/like`);
+//   return response.data;
+// };
+/** 게시글 검색 기능 (제목+내용 or 작성자 기준) */
+export const searchThreads = async (keyword: string, 
+searchType: 'author' | 'title_content', sortBy: 'createDate' | 'views' | 'likes' = 'createDate'
+): Promise<Thread[]> => {
+  const response = await api.get(`/thread/search`, {
+    params: {
+      keyword, 
+      searchType,
+      sortBy,
+    },
+  });
   return response.data;
 };
-/** 게시글 검색 기능  */
-export const searchThreads = async (keyword: string): Promise<Thread[]> => {
-  const response = await api.get(`/thread/search?keyword=${encodeURIComponent(keyword)}`);
+
+/** 좋아요 기능 (게시글 좋아요 수 증가 등 처리) */
+export const likeThread = async (threadId: number, userId: number) => {
+  const response = await api.post(`/thread/${threadId}/like`, null, {
+    params: { userId },
+  });
   return response.data;
 };
